@@ -120,3 +120,53 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 const transactionsRow = document.querySelectorAll('.transactions__row');
+
+//Functions
+const createNicknames = function(accounts) {
+    accounts.forEach(value => {
+      value.nickName = value.userName
+        .toLowerCase()
+        .split(' ')
+        .map(value => value[0])
+        .join('');
+    });
+};
+
+const showUserInterface = function(loggedUser){
+    containerApp.style.opacity = 100;
+    labelWelcome.textContent = `Welcome ${loggedUser.userName.split(' ')[0]}!`;
+    labelDate.textContent = Intl.DateTimeFormat(
+        loggedUser.locale, 
+        {
+            hour: 'numeric',
+            minute: 'numeric',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            weekday: 'long',
+        },).format(new Date());
+
+    //clear inputs
+    inputLoginUsername.value = '';
+    inputLoginPin.value = '';
+    inputLoginPin.blur();
+};
+
+
+//Calling Functions
+createNicknames(accounts);
+
+
+//Globals Variables
+let currentAccount;
+
+//Control
+btnLogin.addEventListener('click', function(e) {
+    e.preventDefault();
+    currentAccount = accounts.find(value => value.nickName === inputLoginUsername.value);
+
+    if (currentAccount?.pin === Number(inputLoginPin.value)){
+        showUserInterface(currentAccount);
+    }
+
+});

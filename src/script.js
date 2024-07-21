@@ -91,7 +91,7 @@ const account1 = {
     locale: 'en-US',
   };
   
-  const accounts = [account1, account2, account3, account4, account5];
+const accounts = [account1, account2, account3, account4, account5];
 
 
 // Elements
@@ -153,12 +153,45 @@ const showUserInterface = function(loggedUser){
 };
 
 
+
+const updateUi = function(currentAccount){
+    displayTransactions(currentAccount);
+};
+
+const displayTransactions = function (account){
+    containerTransactions.innerHTML = '';
+
+    account.transactions.forEach((value, index) => {
+        const transType =  value > 0 ? 'deposit' : 'withdrawal';
+        
+        const transactionRow = `
+            <div class="transactions__row">
+            <div class="transactions__type transactions__type--${transType}">
+                ${index + 1} ${transType}
+            </div>
+            <div class="transactions__date">21/01/2022</div>
+            <div class="transactions__value">${account.transactions[index]}</div>
+            </div>
+            ` 
+        containerTransactions.insertAdjacentHTML('afterbegin', transactionRow); 
+
+        //grey or white rows
+        [...document.querySelectorAll('.transactions__row')].forEach((row, index) => {
+            if(index % 2 === 0){
+                row.style.backgroundColor = 'gainsboro';
+            }
+        })
+    });
+}
+
+
 //Calling Functions
 createNicknames(accounts);
 
 
 //Globals Variables
 let currentAccount;
+
 
 //Control
 btnLogin.addEventListener('click', function(e) {
@@ -169,4 +202,5 @@ btnLogin.addEventListener('click', function(e) {
         showUserInterface(currentAccount);
     }
 
+    updateUi(currentAccount);
 });

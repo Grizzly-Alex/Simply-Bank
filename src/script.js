@@ -130,9 +130,27 @@ const createNicknames = function(accounts) {
         .map(value => value[0])
         .join('');
     });
-  };
+};
 
+const showUserInterface = function(loggedUser){
+    containerApp.style.opacity = 100;
+    labelWelcome.textContent = `Welcome ${loggedUser.userName.split(' ')[0]}!`;
+    labelDate.textContent = Intl.DateTimeFormat(
+        loggedUser.locale, 
+        {
+            hour: 'numeric',
+            minute: 'numeric',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            weekday: 'long',
+        },).format(new Date());
 
+    //clear inputs
+    inputLoginUsername.value = '';
+    inputLoginPin.value = '';
+    inputLoginPin.blur();
+};
 
 
 //Calling Functions
@@ -148,10 +166,7 @@ btnLogin.addEventListener('click', function(e) {
     currentAccount = accounts.find(value => value.nickName === inputLoginUsername.value);
 
     if (currentAccount?.pin === Number(inputLoginPin.value)){
-        // display UI and welcome message
-        containerApp.style.opacity = 100;
-        labelWelcome.textContent = `Welcome ${currentAccount.userName.split(' ')[0]}!`;
-
+        showUserInterface(currentAccount);
     }
 
 });

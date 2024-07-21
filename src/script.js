@@ -152,7 +152,13 @@ const showUserInterface = function(loggedUser){
     inputLoginPin.blur();
 };
 
-
+const formatCurrency = function(value, locale, currency){
+    return new Intl.NumberFormat(
+        locale, {
+            style: 'currency',
+            currency: currency,
+        }).format(value);
+}
 
 const updateUi = function(currentAccount){
     displayTransactions(currentAccount);
@@ -163,6 +169,7 @@ const displayTransactions = function (account){
 
     account.transactions.forEach((value, index) => {
         const transType =  value > 0 ? 'deposit' : 'withdrawal';
+        const formattedCurrency = formatCurrency(value,account.locale,account.currency);
         
         const transactionRow = `
             <div class="transactions__row">
@@ -170,7 +177,7 @@ const displayTransactions = function (account){
                 ${index + 1} ${transType}
             </div>
             <div class="transactions__date">21/01/2022</div>
-            <div class="transactions__value">${account.transactions[index]}</div>
+            <div class="transactions__value">${formattedCurrency}</div>
             </div>
             ` 
         containerTransactions.insertAdjacentHTML('afterbegin', transactionRow); 

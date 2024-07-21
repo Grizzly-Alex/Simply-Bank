@@ -120,3 +120,38 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 const transactionsRow = document.querySelectorAll('.transactions__row');
+
+//Functions
+const createNicknames = function(accounts) {
+    accounts.forEach(value => {
+      value.nickName = value.userName
+        .toLowerCase()
+        .split(' ')
+        .map(value => value[0])
+        .join('');
+    });
+  };
+
+
+
+
+//Calling Functions
+createNicknames(accounts);
+
+
+//Globals Variables
+let currentAccount;
+
+//Control
+btnLogin.addEventListener('click', function(e) {
+    e.preventDefault();
+    currentAccount = accounts.find(value => value.nickName === inputLoginUsername.value);
+
+    if (currentAccount?.pin === Number(inputLoginPin.value)){
+        // display UI and welcome message
+        containerApp.style.opacity = 100;
+        labelWelcome.textContent = `Welcome ${currentAccount.userName.split(' ')[0]}!`;
+
+    }
+
+});

@@ -160,6 +160,25 @@ const formatCurrency = function(value, locale, currency){
         }).format(value);
 }
 
+const formatTransactionDate = function(date, local) {
+    /*const getDayBetween2Dates = (date1, date2) =>
+        Math.round(Math.abs((date2 - date1) / (1000 * 60 * 60 * 24)));
+
+    const daysPassed = getDayBetween2Dates(Date.now(), date);*/
+
+    const getDaysPassed = () => Math.round(Math.abs((Date.now() - date) / (1000 * 60 * 60 * 24)));
+    const daysPassed = getDaysPassed();
+
+    let result;
+    switch(daysPassed){
+        case 0: result = 'today'; break;
+        case 1: result = 'yesterday'; break;
+        case daysPassed <= 7: result = `${daysPassed} days ago`; break;
+        default: result = new Intl.DateTimeFormat(local).format(date);
+    }
+    return result;
+}
+
 const updateUi = function(currentAccount){
     displayTransactions(currentAccount);
 };
@@ -170,14 +189,15 @@ const displayTransactions = function (account){
     account.transactions.forEach((value, index) => {
         const transType =  value > 0 ? 'deposit' : 'withdrawal';
         const formattedCurrency = formatCurrency(value,account.locale,account.currency);
+        const transDate = formatTransactionDate(new Date(account.transactionsDates[index]), account.local);
         
         const transactionRow = `
             <div class="transactions__row">
-            <div class="transactions__type transactions__type--${transType}">
-                ${index + 1} ${transType}
-            </div>
-            <div class="transactions__date">21/01/2022</div>
-            <div class="transactions__value">${formattedCurrency}</div>
+                <div class="transactions__type transactions__type--${transType}">
+                    ${index + 1} ${transType}
+                </div>
+                <div class="transactions__date">${transDate}</div>
+                <div class="transactions__value">${formattedCurrency}</div>
             </div>
             ` 
         containerTransactions.insertAdjacentHTML('afterbegin', transactionRow); 

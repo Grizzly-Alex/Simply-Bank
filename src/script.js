@@ -182,9 +182,32 @@ const displayBalance = function(account) {
   labelBalance.textContent = formatCurrency(account.balance, account.locale, account.currency);
 };
 
-const updateUi = function(currentAccount){
-    displayTransactions(currentAccount);
-    displayBalance(currentAccount);
+const displayTotal = function(account) {
+  const dipositeTotal = account.transactions
+    .filter(value => value > 0)
+    .reduce((acc, value) => acc + value, 0);
+
+    labelSumIn.textContent = formatCurrency(dipositeTotal, account.locale, account.currency);
+
+    const withdrawalsTotal = account.transactions
+    .filter(value => value < 0)
+    .reduce((acc, value) => acc + value, 0);
+
+    labelSumOut.textContent = formatCurrency(withdrawalsTotal, account.locale, account.currency);
+
+    const interestTotal = account.transactions.
+      filter(value => value > 0)
+      .map(value => (value * account.interest) / 100)
+      .filter((value => value >= 5))
+      .reduce((acc, value) => acc + value, 0);
+
+    labelSumInterest.textContent = formatCurrency(interestTotal, account.locale, account.currency);
+};
+
+const updateUi = function(account){
+    displayTransactions(account);
+    displayBalance(account);
+    displayTotal(account);
 };
 
 const displayTransactions = function (account){

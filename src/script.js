@@ -210,6 +210,11 @@ const sortTransactions = function(transactions, sort = false){
   return sortingTransact;
 };
 
+const cashTransfer = function(currentAccount, recipientAccount, transferAmount){
+  currentAccount.transactions.push({cash: -transferAmount, date: new Date()});
+  recipientAccount.transactions.push({cash: transferAmount, date: new Date()}); 
+};
+
 
 //Calling Functions
 createNicknames(accounts);
@@ -239,4 +244,31 @@ btnSort.addEventListener('click', function(e){
   displayTransactions(currentAccount);
   
   sortState = !sortState;
+});
+
+btnTransfer.addEventListener('click', function(e) {
+  e.preventDefault();
+  //data from form
+  const transferAmount = Number(inputTransferAmount.value);
+  const recipientNickName = inputTransferTo.value;
+  //clear form
+  inputTransferAmount.value = '';
+  inputTransferTo.value = '';
+
+  const recipientAccount = accounts
+    .find(value => value.nickName === recipientNickName);
+
+    console.log(currentAccount.balance);
+    console.log(transferAmount);
+
+  if(typeof recipientAccount == 'undefined'){
+    alert('Recipient not exist')
+  }
+  else if(currentAccount.balance < transferAmount){
+    alert('You don\'t have enough funds on your balance')
+  }
+  else{
+    cashTransfer(currentAccount, recipientAccount, transferAmount);
+    updateUi(currentAccount);
+  }; 
 });

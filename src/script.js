@@ -212,7 +212,7 @@ const sortTransactions = function(transactions, sort = false){
 
 const cashTransfer = function(currentAccount, recipientAccount, transferAmount){
   currentAccount.transactions.push({cash: -transferAmount, date: new Date()});
-  recipientAccount.transactions.push({cash: -transferAmount, date: new Date()}); 
+  recipientAccount.transactions.push({cash: transferAmount, date: new Date()}); 
 };
 
 
@@ -255,16 +255,20 @@ btnTransfer.addEventListener('click', function(e) {
   inputTransferAmount.value = '';
   inputTransferTo.value = '';
 
-  //checking
-  let success; 
+  const recipientAccount = accounts
+    .find(value => value.nickName === recipientNickName);
 
-  const recipientAccount = accounts.map(value => value.nickName).includes(recipientNickName);
-  console.log(recipientAccount);
+    console.log(currentAccount.balance);
+    console.log(transferAmount);
 
-
-
-  cashTransfer(currentAccount, recipientAccount, transferAmount);
-
-  updateUi(currentAccount);
-  
+  if(typeof recipientAccount == 'undefined'){
+    alert('Recipient not exist')
+  }
+  else if(currentAccount.balance < transferAmount){
+    alert('You don\'t have enough funds on your balance')
+  }
+  else{
+    cashTransfer(currentAccount, recipientAccount, transferAmount);
+    updateUi(currentAccount);
+  }; 
 });

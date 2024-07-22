@@ -158,15 +158,12 @@ const formatCurrency = function(value, locale, currency){
             style: 'currency',
             currency: currency,
         }).format(value);
-}
+};
 
 const formatTransactionDate = function(date, local) {
-    /*const getDayBetween2Dates = (date1, date2) =>
-        Math.round(Math.abs((date2 - date1) / (1000 * 60 * 60 * 24)));
+    const getDaysPassed = () => 
+      Math.round(Math.abs((Date.now() - date) / (1000 * 60 * 60 * 24)));
 
-    const daysPassed = getDayBetween2Dates(Date.now(), date);*/
-
-    const getDaysPassed = () => Math.round(Math.abs((Date.now() - date) / (1000 * 60 * 60 * 24)));
     const daysPassed = getDaysPassed();
 
     let result;
@@ -177,10 +174,17 @@ const formatTransactionDate = function(date, local) {
         default: result = new Intl.DateTimeFormat(local).format(date);
     }
     return result;
-}
+};
+
+const displayBalance = function(account) {
+  const balance = account.transactions.reduce((acc, value) => acc += value, 0);
+  account.balance = balance;
+  labelBalance.textContent = formatCurrency(account.balance, account.locale, account.currency);
+};
 
 const updateUi = function(currentAccount){
     displayTransactions(currentAccount);
+    displayBalance(currentAccount);
 };
 
 const displayTransactions = function (account){
@@ -209,7 +213,7 @@ const displayTransactions = function (account){
             }
         })
     });
-}
+};
 
 
 //Calling Functions

@@ -272,3 +272,15 @@ btnTransfer.addEventListener('click', function(e) {
     updateUi(currentAccount);
   }; 
 });
+
+btnLoan.addEventListener('click', function(e){
+    e.preventDefault();
+  
+    const loanAmount = Math.floor(inputLoanAmount.value);
+    inputLoanAmount.value = '';
+  
+    if (loanAmount > 0 && currentAccount.transactions.some(value => value.cash >= loanAmount * 10 / 100)){
+        currentAccount.transactions.push({ cash: loanAmount, date: new Date()});
+        updateUi(currentAccount);    
+    }    
+});

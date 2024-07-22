@@ -215,6 +215,10 @@ const cashTransfer = function(currentAccount, recipientAccount, transferAmount){
   recipientAccount.transactions.push({cash: transferAmount, date: new Date()}); 
 };
 
+const closeAccount = function(nickName){
+    const removedIndex = accounts.findIndex(value => value.nickName === nickName);
+    accounts.splice(removedIndex, 1);
+};
 
 //Calling Functions
 createNicknames(accounts);
@@ -264,7 +268,7 @@ btnTransfer.addEventListener('click', function(e) {
   if(typeof recipientAccount == 'undefined'){
     alert('Recipient not exist')
   }
-  else if(currentAccount.balance < transferAmount){
+  if(currentAccount.balance < transferAmount){
     alert('You don\'t have enough funds on your balance')
   }
   else{
@@ -282,5 +286,31 @@ btnLoan.addEventListener('click', function(e){
     if (loanAmount > 0 && currentAccount.transactions.some(value => value.cash >= loanAmount * 10 / 100)){
         currentAccount.transactions.push({ cash: loanAmount, date: new Date()});
         updateUi(currentAccount);    
+    }
+    else{
+        alert('The desired amount is too high.')
     }    
+});
+
+btnClose.addEventListener('click', function(e){
+    e.preventDefault(); 
+    const closePin = Number(inputClosePin.value);
+    const closeUsername = inputCloseUsername.value;
+    inputClosePin.value = '';
+    inputCloseUsername.value = '';
+
+    const pinSuccess = closePin === currentAccount.pin;
+    const nickNameSuccess = closeUsername === currentAccount.nickName;
+  
+    if (!pinSuccess){
+        alert(`PIN code does not match.`)  
+    }
+    if (!nickNameSuccess){
+        alert(`Nickname does not match.`)  
+    }
+    else
+    {
+        closeAccount(closeUsername);
+        containerApp.style.opacity = 0;
+    }
 });

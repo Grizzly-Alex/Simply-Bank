@@ -91,7 +91,7 @@ const account1 = {
     locale: 'en-US',
   };
   
-  const accounts = [account1, account2, account3, account4, account5];
+const accounts = [account1, account2, account3, account4, account5];
 
 
 // Elements
@@ -152,6 +152,92 @@ const showUserInterface = function(loggedUser){
     inputLoginPin.blur();
 };
 
+const formatCurrency = function(value, locale, currency){
+    return new Intl.NumberFormat(
+        locale, {
+            style: 'currency',
+            currency: currency,
+        }).format(value);
+};
+
+const formatTransactionDate = function(date, local) {
+    const getDaysPassed = () => 
+      Math.round(Math.abs((Date.now() - date) / (1000 * 60 * 60 * 24)));
+
+    const daysPassed = getDaysPassed();
+
+    let result;
+    switch(daysPassed){
+        case 0: result = 'today'; break;
+        case 1: result = 'yesterday'; break;
+        case daysPassed <= 7: result = `${daysPassed} days ago`; break;
+        default: result = new Intl.DateTimeFormat(local).format(date);
+    }
+    return result;
+};
+
+const displayBalance = function(account) {
+  const balance = account.transactions.reduce((acc, value) => acc += value, 0);
+  account.balance = balance;
+  labelBalance.textContent = formatCurrency(account.balance, account.locale, account.currency);
+};
+
+const displayTotal = function(account) {
+  const dipositeTotal = account.transactions
+    .filter(value => value > 0)
+    .reduce((acc, value) => acc + value, 0);
+
+    labelSumIn.textContent = formatCurrency(dipositeTotal, account.locale, account.currency);
+
+    const withdrawalsTotal = account.transactions
+    .filter(value => value < 0)
+    .reduce((acc, value) => acc + value, 0);
+
+    labelSumOut.textContent = formatCurrency(withdrawalsTotal, account.locale, account.currency);
+
+    const interestTotal = account.transactions.
+      filter(value => value > 0)
+      .map(value => (value * account.interest) / 100)
+      .filter((value => value >= 5))
+      .reduce((acc, value) => acc + value, 0);
+
+    labelSumInterest.textContent = formatCurrency(interestTotal, account.locale, account.currency);
+};
+
+const updateUi = function(account){
+    displayTransactions(account);
+    displayBalance(account);
+    displayTotal(account);
+};
+
+const displayTransactions = function (account){
+    containerTransactions.innerHTML = '';
+
+    account.transactions.forEach((value, index) => {
+        const transType =  value > 0 ? 'deposit' : 'withdrawal';
+        const formattedCurrency = formatCurrency(value,account.locale,account.currency);
+        const transDate = formatTransactionDate(new Date(account.transactionsDates[index]), account.local);
+        
+        const transactionRow = `
+            <div class="transactions__row">
+                <div class="transactions__type transactions__type--${transType}">
+                    ${index + 1} ${transType}
+                </div>
+                <div class="transactions__date">${transDate}</div>
+                <div class="transactions__value">${formattedCurrency}</div>
+            </div>
+            ` 
+        containerTransactions.insertAdjacentHTML('afterbegin', transactionRow); 
+
+        //grey or white rows
+        [...document.querySelectorAll('.transactions__row')].forEach((row, index) => {
+            if(index % 2 === 0){
+                row.style.backgroundColor = 'gainsboro';
+            }
+        })
+    });
+};
+
 
 //Calling Functions
 createNicknames(accounts);
@@ -159,6 +245,7 @@ createNicknames(accounts);
 
 //Globals Variables
 let currentAccount;
+
 
 //Control
 btnLogin.addEventListener('click', function(e) {
@@ -169,4 +256,5 @@ btnLogin.addEventListener('click', function(e) {
         showUserInterface(currentAccount);
     }
 
+    updateUi(currentAccount);
 });

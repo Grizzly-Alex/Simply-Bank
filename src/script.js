@@ -95,7 +95,7 @@ const createNicknames = function(accounts) {
         .map(value => value[0])
         .join('');
     });
-};
+}
 
 const showUserInterface = function(loggedUser){
     containerApp.style.opacity = 100;
@@ -115,7 +115,7 @@ const showUserInterface = function(loggedUser){
     inputLoginUsername.value = '';
     inputLoginPin.value = '';
     inputLoginPin.blur();
-};
+}
 
 const formatCurrency = function(value, locale, currency){
     return new Intl.NumberFormat(
@@ -123,7 +123,7 @@ const formatCurrency = function(value, locale, currency){
             style: 'currency',
             currency: currency,
         }).format(value);
-};
+}
 
 const formatTransactionDate = function(date, local) {
     const getDaysPassed = () => 
@@ -139,13 +139,13 @@ const formatTransactionDate = function(date, local) {
         default: result = new Intl.DateTimeFormat(local).format(date);
     }
     return result;
-};
+}
 
 const displayBalance = function(account) {
   const balance = account.transactions.reduce((acc, value) => acc += value.cash, 0);
   account.balance = balance;
   labelBalance.textContent = formatCurrency(account.balance, account.locale, account.currency);
-};
+}
 
 const displayTotal = function(account) {
   const dipositeTotal = account.transactions
@@ -167,7 +167,7 @@ const displayTotal = function(account) {
       .reduce((acc, value) => acc + value, 0);
 
     labelSumInterest.textContent = formatCurrency(interestTotal, account.locale, account.currency);
-};
+}
 
 const displayTransactions = function (account){
   containerTransactions.innerHTML = '';
@@ -195,30 +195,50 @@ const displayTransactions = function (account){
           }
       })
   });
-};
+}
 
 const updateUi = function(account){
     displayTransactions(account);
     displayBalance(account);
     displayTotal(account);
-};
+}
 
 const sortTransactions = function(transactions, sort = false){
   const sortingTransact = sort 
     ? transactions.slice().sort((first, second) => first.cash - second.cash)
     : transactions.slice().sort((first, second) => second.cash - first.cash)
   return sortingTransact;
-};
+}
 
 const cashTransfer = function(currentAccount, recipientAccount, transferAmount){
   currentAccount.transactions.push({cash: -transferAmount, date: new Date()});
   recipientAccount.transactions.push({cash: transferAmount, date: new Date()}); 
-};
+}
 
 const closeAccount = function(nickName){
     const removedIndex = accounts.findIndex(value => value.nickName === nickName);
     accounts.splice(removedIndex, 1);
-};
+}
+
+const startLogoutTimer = function(time){
+  const logOutTimerCallback = () => {
+    const minutes = String(Math.trunc(time / 60)).padStart(2, '0');
+    const seconds = String(time % 60).padStart(2, '0');
+    labelTimer.textContent = `${minutes}:${seconds}`;
+
+    if(time === 0){
+      clearInterval(logOutEvent);
+      containerApp.style.opacity = 0;
+      labelWelcome.textContent = 'Login';
+    }
+    time--;
+  };
+
+  logOutTimerCallback();
+  const logOutEvent = setInterval(logOutTimerCallback, 1000);
+
+  return logOutEvent;
+}
 
 //Calling Functions
 createNicknames(accounts);
@@ -226,7 +246,9 @@ createNicknames(accounts);
 
 //Globals Variables
 let currentAccount;
+let currentLogOutTimer;
 let sortState = false;
+let timeOut = 30;
 
 //Control
 btnLogin.addEventListener('click', function(e) {
@@ -234,10 +256,14 @@ btnLogin.addEventListener('click', function(e) {
     currentAccount = accounts.find(value => value.nickName === inputLoginUsername.value);
 
     if (currentAccount?.pin === Number(inputLoginPin.value)){
-        showUserInterface(currentAccount);
-    }
+        showUserInterface(currentAccount);      
 
-    updateUi(currentAccount);
+        // Check if timer exists
+        if (currentLogOutTimer) clearInterval(currentLogOutTimer);
+        currentLogOutTimer = startLogoutTimer(timeOut);
+
+        updateUi(currentAccount);
+    }
 });
 
 
@@ -274,6 +300,8 @@ btnTransfer.addEventListener('click', function(e) {
   else{
     cashTransfer(currentAccount, recipientAccount, transferAmount);
     updateUi(currentAccount);
+    clearInterval(currentLogOutTimer);
+    currentLogOutTimer = startLogoutTimer(timeOut);
   }; 
 });
 
@@ -284,12 +312,14 @@ btnLoan.addEventListener('click', function(e){
     inputLoanAmount.value = '';
   
     if (loanAmount > 0 && currentAccount.transactions.some(value => value.cash >= loanAmount * 10 / 100)){
-        currentAccount.transactions.push({ cash: loanAmount, date: new Date()});
-        updateUi(currentAccount);    
+        currentAccount.transactions.push({ cash: loanAmount, date: new Date()});  
     }
     else{
         alert('The desired amount is too high.')
-    }    
+    } 
+    clearInterval(currentLogOutTimer);
+    currentLogOutTimer = startLogoutTimer(timeOut);
+    inputLoanAmount.value = '';   
 });
 
 btnClose.addEventListener('click', function(e){
